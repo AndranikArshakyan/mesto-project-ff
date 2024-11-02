@@ -1,0 +1,11 @@
+@import url('./__result/spinner-content__result.css');
+@import url('./__error/spinner-content__error.css');
+
+.spinner-content {
+  text-align: center;
+  display: none;
+}
+
+.spinner-content_visible{
+  display: block;
+}

@@ -1,0 +1,7 @@
+.spinner-content__error {
+  color: #ffffff;
+}
+
+.spinner-content__error_visible {
+  display: block; 
+}

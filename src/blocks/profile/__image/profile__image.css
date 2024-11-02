@@ -1,12 +1,50 @@
-.profile__image {
+.profile__image,
+.profile__image::before {
   width: 120px;
   height: 120px;
   -webkit-border-radius: 50%;
   -moz-border-radius: 50%;
   border-radius: 50%;
+}
+
+.profile__image {
   background-size: cover;
   background-position: center;
   margin: 0 29px 0 0;
+  position: relative;
+}
+
+.profile__image:hover::after {
+  display: block;
+}
+
+.profile__image::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.profile__image:hover::before {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.profile__image:hover::after,
+.profile__image:hover::before { 
+  cursor: pointer;
+}
+
+.profile__image::after {
+  content: url("../../../images/profile__image-edit-button.svg");
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  z-index: 1;
+  display: none;
+  transform: translate(-50%, -50%);
 }
 
 @media screen and (max-width: 740px) {

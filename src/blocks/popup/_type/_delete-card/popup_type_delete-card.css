@@ -1,0 +1,11 @@
+.popup_type_delete-card .popup__content{
+  min-height: max-content;
+}
+
+.popup_type_delete-card .popup__form{
+  margin-top: 0;
+}
+
+.popup_type_delete-card .popup__button{
+  margin-top: 33px;
+}
