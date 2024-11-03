@@ -100,7 +100,7 @@ export {
   updateUserInfo,
   addNewCard,
   deleteCard,
-  setLike as apiSetLike,
-  deleteLike as apiDeleteLike,
+  setLike,
+  deleteLike,
   updateUserImage,
 };

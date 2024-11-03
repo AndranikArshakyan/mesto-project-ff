@@ -1,33 +1,25 @@
-import { apiSetLike, apiDeleteLike } from "./api";
+import { setLike, deleteLike } from "./api";
 
 const cardTemplate = document.querySelector("#card-template").content;
 
-const isLiked = (card, profilePromiseRepsonse) => {
+const isLiked = (card, userInfo) => {
   return card.likes.some((item) => {
-    return item._id === profilePromiseRepsonse._id;
+    return item._id === userInfo._id;
   });
 };
 
-const setLike = (evt, cardId) => {
-  apiSetLike(cardId)
+const toggleLike = (evt, cardId, cardLikeButton) => {
+  const likeMethod = cardLikeButton.classList.contains(
+    "card__like-button_is-active"
+  )
+    ? deleteLike
+    : setLike;
+  likeMethod(cardId)
     .then((res) => {
       evt.target
         .closest(".card")
         .querySelector(".card__like-count").textContent = res.likes.length;
-      evt.target.classList.add("card__like-button_is-active");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-
-const deleteLike = (evt, cardId) => {
-  apiDeleteLike(cardId)
-    .then((res) => {
-      evt.target
-        .closest(".card")
-        .querySelector(".card__like-count").textContent = res.likes.length;
-      evt.target.classList.remove("card__like-button_is-active");
+      evt.target.classList.toggle("card__like-button_is-active");
     })
     .catch((err) => {
       console.log(err);
@@ -36,11 +28,11 @@ const deleteLike = (evt, cardId) => {
 
 const createCard = (
   item,
-  setLike,
   handleImageZoom,
-  deleteLike,
+  toggleLike,
   openModal,
-  onDeleteCard
+  onDeleteCard,
+  userInfo
 ) => {
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const cardImage = cardElement.querySelector(".card__image");
@@ -58,16 +50,20 @@ const createCard = (
     openModal(popup);
     onDeleteCard(evt, item._id);
   });
+
+  if (isLiked(item, userInfo)) {
+    cardLikeButton.classList.add("card__like-button_is-active");
+  }
+
   cardLikeButton.addEventListener("click", (evt) => {
-    if (cardLikeButton.classList.contains("card__like-button_is-active")) {
-      deleteLike(evt, item._id);
-    } else {
-      setLike(evt, item._id);
-    }
+    toggleLike(evt, item._id, cardLikeButton);
   });
   cardImage.addEventListener("click", () => handleImageZoom(item));
 
+  if (item.owner._id !== userInfo._id) {
+    cardDeleteButton.remove();
+  }
   return cardElement;
 };
 
-export { createCard, setLike, isLiked, deleteLike };
+export { createCard, toggleLike };

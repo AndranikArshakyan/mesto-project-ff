@@ -1,5 +1,5 @@
 import "../pages/index.css";
-import { createCard, setLike, isLiked, deleteLike } from "./card";
+import { createCard, toggleLike } from "./card";
 import { openModal, closeModal, addCloseEventListeners } from "./modal";
 import { enableValidation, clearValidation } from "./validation";
 import {
@@ -128,42 +128,34 @@ const renderInitialCards = (cardsPromiseResponse, profilePromiseRepsonse) => {
   cardsPromiseResponse.forEach((card) => {
     const cardElement = createCard(
       card,
-      (evt) => setLike(evt, card._id),
       handleImageZoom,
-      (evt) => deleteLike(evt, card._id),
+      (evt) =>
+        toggleLike(
+          evt,
+          card._id,
+          cardElement.querySelector(".card__like-button")
+        ),
       () => openModal(popupTypeDeleteCard),
-      (evt) => onDeleteCard(evt, card._id)
+      (evt) => onDeleteCard(evt, card._id),
+      profilePromiseRepsonse
     );
-
-    if (isLiked(card, profilePromiseRepsonse)) {
-      const cardLikeButton = cardElement.querySelector(".card__like-button");
-      cardLikeButton.classList.add("card__like-button_is-active");
-    }
-
-    if (card.owner._id !== profilePromiseRepsonse._id) {
-      const cardDeleteButton = cardElement.querySelector(
-        ".card__delete-button"
-      );
-      cardDeleteButton.remove();
-    }
-
     addCard(cardElement);
   });
 };
 
-const renderProfileInfo = (profilePromiseRepsonse) => {
-  profileTitle.textContent = profilePromiseRepsonse.name;
-  profileDescription.textContent = profilePromiseRepsonse.about;
-  profileImage.style.backgroundImage = `url(${profilePromiseRepsonse.avatar})`;
+const renderProfileInfo = (userInfo) => {
+  profileTitle.textContent = userInfo.name;
+  profileDescription.textContent = userInfo.about;
+  profileImage.style.backgroundImage = `url(${userInfo.avatar})`;
 };
 
-const checkResponse = () => {
+const loadInitialData = () => {
   renderLoading(true, preloader, spinnerCircle, spinner, spinnerContent);
   const promisesArray = [getUserInfo(), getInitialCards()];
   Promise.all(promisesArray)
-    .then((res) => {
-      renderProfileInfo(res[0]);
-      renderInitialCards(res[1], res[0]);
+    .then(([userInfo, cards]) => {
+      renderProfileInfo(userInfo);
+      renderInitialCards(cards, userInfo);
       renderLoading(false, preloader, spinnerCircle, spinner, spinnerContent);
     })
     .catch((err) => {
@@ -176,7 +168,7 @@ const checkResponse = () => {
       );
     });
 };
-checkResponse();
+loadInitialData();
 
 profileEditButton.addEventListener("click", () => {
   openModal(popupTypeEdit);
@@ -224,25 +216,26 @@ const handleCardFormSubmit = (evt) => {
   popupAddCardButton.textContent = "Сохранение...";
   addNewCard(popupInputCardName.value, popupInputCardLink.value)
     .then((res) => {
-      addCard(
-        createCard(
-          {
-            name: res.name,
-            link: res.link,
-            likes: res.likes,
-          },
-          (evt) => setLike(evt, res._id),
-          handleImageZoom,
-          (evt) => deleteLike(evt, res._id),
-          (evt) => openModal(popupTypeDeleteCard),
-          (evt) => onDeleteCard(evt, res._id)
-        )
+      const cardElement = createCard(
+        res,
+        handleImageZoom,
+        (evt) =>
+          toggleLike(
+            evt,
+            res._id,
+            cardElement.querySelector(".card__like-button")
+          ),
+        () => openModal(popupTypeDeleteCard),
+        (evt) => onDeleteCard(evt, res._id),
+        res.owner
       );
+      addCard(cardElement);
       closeModal(popupTypeCard);
       popupNewCardForm.reset();
     })
     .catch((err) => {
       popupAddCardButton.textContent = `${err}`;
+      console.log(err);
     });
 };
 popupNewCardForm.addEventListener("submit", handleCardFormSubmit);
